@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Income Tax & Sodexo Planner (New Regime)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        emerald: {
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                            950: '#022c22'
+                        },
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                        },
+                        rose: {
+                            500: '#f43f5e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar & visual polish */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        .tier-card-active {
+            border-color: #10b981 !important;
+            background-color: rgba(16, 185, 129, 0.08) !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-950 font-sans text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
+
+    <!-- Navigation Bar -->
+    <header class="glass-panel sticky top-0 z-50 border-b border-slate-800/80 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/20 font-black text-xl">
+                    <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                        TaxShield Pro <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">FY 2025-26</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">New Regime Tax & Sodexo Optimization Planner</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button id="reset-btn" onclick="resetDefaults()" class="text-xs px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left text-slate-400"></i> Reset Defaults
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
+
+        <!-- Banner Info -->
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                    <h2 class="text-base font-semibold text-slate-200">Zero-Tax Threshold Target: ₹12,00,000</h2>
+                </div>
+                <p class="text-xs text-slate-400 max-w-2xl">
+                    Under the updated New Tax Regime, taxable income up to ₹12 Lakhs attracts effectively ₹0 tax via Section 87A rebate. Beyond ₹12L, strict <span class="text-emerald-400 font-medium">Marginal Relief</span> ensures your tax cannot exceed your income earned over ₹12L!
+                </p>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-900/80 px-4 py-2.5 rounded-xl border border-slate-800 shrink-0">
+                <span class="text-xs text-slate-400">Standard Exemption Target:</span>
+                <span class="text-sm font-bold text-emerald-400">₹12,00,000</span>
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- LEFT COLUMN: INPUT CONTROLS (5 Cols) -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- Input Card 1: Core Base & Past Usage -->
+                <div class="glass-panel rounded-2xl p-5 space-y-4 shadow-lg">
+                    <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+                        <i class="fa-solid fa-indian-rupee-sign text-emerald-400"></i>
+                        <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider">1. Base Income & Past Usage</h3>
+                    </div>
+
+                    <!-- Pure Base Income -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-300 flex justify-between">
+                            <span>Pure Base Income (Annual)</span>
+                            <span class="text-slate-500 font-normal">Excl. past food allowance</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">₹</span>
+                            <input type="number" id="pure-base-income" value="1207466" step="1000"
+                                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-8 pr-4 py-2.5 text-sm font-semibold text-emerald-400 focus:outline-none focus:border-emerald-500 transition-all"
+                                oninput="recalculateAll()">
+                        </div>
+                    </div>
+
+                    <!-- Past Food Allowance Used -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-300 flex justify-between">
+                            <span>Past Food Allowance Used</span>
+                            <span class="text-slate-500 font-normal">March to Present</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">₹</span>
+                            <input type="number" id="past-food-used" value="0" step="500"
+                                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-8 pr-4 py-2.5 text-sm font-medium text-slate-200 focus:outline-none focus:border-emerald-500 transition-all"
+                                oninput="recalculateAll()">
+                        </div>
+                    </div>
+
+                    <!-- Current Adjusted Baseline Box -->
+                    <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-between items-center text-xs">
+                        <span class="text-slate-400">Current Adjusted Baseline:</span>
+                        <span id="current-adjusted-baseline-display" class="font-bold text-slate-200">₹12,07,466</span>
+                    </div>
+                </div>
+
+                <!-- Input Card 2: Sodexo Tier Selector -->
+                <div class="glass-panel rounded-2xl p-5 space-y-4 shadow-lg">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-utensils text-emerald-400"></i>
+                            <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider">2. Sodexo Tier (Oct - Mar)</h3>
+                        </div>
+                        <span id="sodexo-shield-badge" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                            ₹0 Shield
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-slate-400">Select monthly tax-exempt meal card allowance (6-month active period):</p>
+
+                    <!-- Radio Grid for Tiers -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="sodexo-tiers-container">
+                        <!-- Tiers injected dynamically via JS -->
+                    </div>
+                </div>
+
+                <!-- Input Card 3: Future Spending & TDS Paid -->
+                <div class="glass-panel rounded-2xl p-5 space-y-4 shadow-lg">
+                    <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
+                        <i class="fa-solid fa-sliders text-emerald-400"></i>
+                        <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider">3. Spending & TDS Offsets</h3>
+                    </div>
+
+                    <!-- Future Cafeteria Spending -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center text-xs font-semibold">
+                            <span class="text-slate-300">Expected Future Food Spend (Oct - Mar)</span>
+                            <span id="future-spend-val-display" class="text-emerald-400 font-bold">₹0</span>
+                        </div>
+                        <input type="range" id="future-food-planned-range" min="0" max="100000" step="1000" value="0"
+                            class="w-full accent-emerald-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+                            oninput="syncFutureSpendFromRange()">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">₹</span>
+                            <input type="number" id="future-food-planned" value="0" step="500"
+                                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-8 pr-4 py-2 text-sm font-medium text-slate-200 focus:outline-none focus:border-emerald-500 transition-all"
+                                oninput="syncFutureSpendFromInput()">
+                        </div>
+                    </div>
+
+                    <!-- TDS Paid Already -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-300 flex justify-between">
+                            <span>TDS Already Paid / Subtracted</span>
+                            <span class="text-slate-500 font-normal">Fixed tax withheld</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">₹</span>
+                            <input type="number" id="tds-paid" value="14800" step="500"
+                                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-8 pr-4 py-2.5 text-sm font-medium text-amber-400 focus:outline-none focus:border-amber-500 transition-all"
+                                oninput="recalculateAll()">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: RESULTS, KPI & VISUALS (7 Cols) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- KPI Dashboard Overview -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    
+                    <!-- KPI 1: Final Taxable Income -->
+                    <div class="glass-panel p-4 rounded-2xl space-y-1 relative overflow-hidden border-l-4 border-l-indigo-500">
+                        <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Net Taxable Income</div>
+                        <div id="kpi-taxable-income" class="text-xl font-black text-white">₹0</div>
+                        <div class="text-[10px] text-slate-500 flex items-center gap-1">
+                            <span id="kpi-excess-tag" class="text-emerald-400">Within ₹12L limit</span>
+                        </div>
+                    </div>
+
+                    <!-- KPI 2: Total Tax Liability -->
+                    <div class="glass-panel p-4 rounded-2xl space-y-1 relative overflow-hidden border-l-4 border-l-teal-500">
+                        <div class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Tax Owed (inc. Cess)</div>
+                        <div id="kpi-tax-liability" class="text-xl font-black text-white">₹0</div>
+                        <div id="kpi-cess-note" class="text-[10px] text-slate-400">Includes 4% Cess</div>
+                    </div>
+
+                    <!-- KPI 3: Final Status / Refund -->
+                    <div id="kpi-status-card" class="glass-panel p-4 rounded-2xl space-y-1 relative overflow-hidden border-l-4 border-l-emerald-500 bg-emerald-950/20">
+                        <div id="kpi-status-label" class="text-[11px] font-medium text-emerald-400 uppercase tracking-wider">Final Refund Due</div>
+                        <div id="kpi-status-amount" class="text-xl font-black text-emerald-400">₹14,800</div>
+                        <div id="kpi-status-desc" class="text-[10px] text-emerald-300/80">Full TDS refunded</div>
+                    </div>
+
+                </div>
+
+                <!-- Marginal Relief Active Status Banner -->
+                <div id="marginal-relief-banner" class="hidden glass-panel p-4 rounded-2xl border border-amber-500/30 bg-amber-950/20 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5 uppercase tracking-wide">
+                            <i class="fa-solid fa-scale-balanced text-base"></i> Marginal Relief Active!
+                        </span>
+                        <span id="mr-savings-badge" class="text-xs font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full">
+                            Savings: ₹0
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Standard slab tax (<span id="mr-standard-tax" class="font-semibold text-slate-100">₹0</span>) exceeded your income over ₹12 Lakhs (<span id="mr-excess-inc" class="font-semibold text-slate-100">₹0</span>). Base tax was capped at the excess amount!
+                    </p>
+                </div>
+
+                <!-- Optimization Strategy Hint Card -->
+                <div id="hint-card" class="glass-panel p-4 rounded-2xl border border-indigo-500/30 bg-indigo-950/20 flex items-start gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
+                        <i class="fa-solid fa-lightbulb text-lg"></i>
+                    </div>
+                    <div class="space-y-1 text-xs">
+                        <div class="font-bold text-indigo-300 text-sm">Smart Tax Optimization Hint</div>
+                        <p id="hint-text" class="text-slate-300 leading-relaxed">
+                            Calculating tax headroom...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Income Threshold Visual Progress Bar -->
+                <div class="glass-panel p-5 rounded-2xl space-y-3 shadow-lg">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-line text-emerald-400"></i> Income vs ₹12L Threshold
+                        </span>
+                        <span id="progress-income-text" class="font-semibold text-emerald-400">₹0 / ₹12,00,000</span>
+                    </div>
+                    <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden p-0.5 border border-slate-800 relative">
+                        <!-- 12L Marker line -->
+                        <div class="absolute top-0 bottom-0 left-[75%] w-0.5 bg-amber-400 z-10" title="12L Target Threshold"></div>
+                        <div id="income-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] text-slate-500 font-medium px-0.5">
+                        <span>₹0</span>
+                        <span>₹8 Lakhs</span>
+                        <span class="text-amber-400 font-bold">₹12 Lakhs (Zero Tax Limit)</span>
+                        <span>₹16 Lakhs+</span>
+                    </div>
+                </div>
+
+                <!-- Tax Breakdown Tabs & Visual Slabs Chart -->
+                <div class="glass-panel rounded-2xl p-5 space-y-4 shadow-lg">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-emerald-400"></i> Tax Slab Breakdown (New Regime)
+                        </h3>
+                        <span class="text-xs text-slate-400">Budget 2025-26</span>
+                    </div>
+
+                    <!-- Visual Chart -->
+                    <div class="h-44 w-full">
+                        <canvas id="taxSlabChart"></canvas>
+                    </div>
+
+                    <!-- Breakdown Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-400">
+                                    <th class="py-2 px-2">Tax Slab</th>
+                                    <th class="py-2 px-2 text-center">Rate</th>
+                                    <th class="py-2 px-2 text-right">Taxable Amount</th>
+                                    <th class="py-2 px-2 text-right">Tax Owed</th>
+                                </tr>
+                            </thead>
+                            <tbody id="slab-breakdown-rows" class="divide-y divide-slate-800/50 text-slate-300">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- What-if Scenario Matrix -->
+                <div class="glass-panel rounded-2xl p-5 space-y-3 shadow-lg">
+                    <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-2">
+                        <i class="fa-solid fa-table-columns text-emerald-400"></i> Sodexo Tier Impact Comparison
+                    </h3>
+                    <p class="text-xs text-slate-400">See how selecting different monthly Sodexo tiers alters your net tax & refund:</p>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-slate-400">
+                                    <th class="py-2 px-2">Tier</th>
+                                    <th class="py-2 px-2">6-Mo Shield</th>
+                                    <th class="py-2 px-2 text-right">Net Taxable</th>
+                                    <th class="py-2 px-2 text-right">Tax Liability</th>
+                                    <th class="py-2 px-2 text-right">Net Refund / (Due)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scenario-matrix-body" class="divide-y divide-slate-800/50 text-slate-300">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="border-t border-slate-800/80 py-4 text-center text-xs text-slate-500 mt-8">
+        <p>TaxShield Pro &bull; New Regime Income Tax Calculation Engine with Marginal Relief & Food Allowance Shield</p>
+    </footer>
+
+    <script>
+        // Tier Data Structure
+        const SODEXO_TIERS = [
+            { id: "0", label: "₹0 / mo", monthly: 0, desc: "No Sodexo" },
+            { id: "1", label: "₹2,200 / mo", monthly: 2200, desc: "Tier 1" },
+            { id: "2", label: "₹4,400 / mo", monthly: 4400, desc: "Tier 2" },
+            { id: "3", label: "₹6,600 / mo", monthly: 6600, desc: "Tier 3" },
+            { id: "4", label: "₹8,800 / mo", monthly: 8800, desc: "Tier 4 (Max)" }
+        ];
+
+        let selectedTierId = "0";
+        let taxChart = null;
+
+        // Initialize UI & chart on load
+        window.onload = function() {
+            renderTierCards();
+            initChart();
+            recalculateAll();
+        };
+
+        // Render Sodexo Tier Cards
+        function renderTierCards() {
+            const container = document.getElementById('sodexo-tiers-container');
+            container.innerHTML = SODEXO_TIERS.map(tier => `
+                <div id="tier-card-${tier.id}" onclick="selectTier('${tier.id}')"
+                    class="cursor-pointer border border-slate-800 bg-slate-900/80 p-3 rounded-xl transition-all duration-200 hover:border-slate-700 flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold text-slate-200">${tier.label}</span>
+                        <span class="text-[10px] text-slate-500 font-mono">${tier.desc}</span>
+                    </div>
+                    <div class="text-[11px] font-semibold text-emerald-400">
+                        ₹${(tier.monthly * 6).toLocaleString('en-IN')} Shield
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Tier Selection Handler
+        function selectTier(id) {
+            selectedTierId = id;
+            SODEXO_TIERS.forEach(t => {
+                const card = document.getElementById(`tier-card-${t.id}`);
+                if (card) {
+                    if (t.id === id) {
+                        card.classList.add('tier-card-active');
+                    } else {
+                        card.classList.remove('tier-card-active');
+                    }
+                }
+            });
+            recalculateAll();
+        }
+
+        // Sync inputs for future spend
+        function syncFutureSpendFromRange() {
+            const val = document.getElementById('future-food-planned-range').value;
+            document.getElementById('future-food-planned').value = val;
+            document.getElementById('future-spend-val-display').innerText = '₹' + Number(val).toLocaleString('en-IN');
+            recalculateAll();
+        }
+
+        function syncFutureSpendFromInput() {
+            const val = document.getElementById('future-food-planned').value || 0;
+            document.getElementById('future-food-planned-range').value = val;
+            document.getElementById('future-spend-val-display').innerText = '₹' + Number(val).toLocaleString('en-IN');
+            recalculateAll();
+        }
+
+        // Core Tax Math Logic matching Python script
+        function calculateTaxNewRegimeWithBreakdown(income) {
+            // Standard progressive tax slabs calculation (New Regime 2025-26)
+            // Up to 4L: 0% | 4L-8L: 5% (20k) | 8L-12L: 10% (40k) | 12L-16L: 15% | 16L-24L: 20% | >24L: 30%
+            
+            let breakdown = [
+                { slab: "Up to ₹4,00,000", rate: "0%", taxable: 0, tax: 0 },
+                { slab: "₹4,00,001 - ₹8,00,000", rate: "5%", taxable: 0, tax: 0 },
+                { slab: "₹8,00,001 - ₹12,00,000", rate: "10%", taxable: 0, tax: 0 },
+                { slab: "₹12,00,001 - ₹16,00,000", rate: "15%", taxable: 0, tax: 0 },
+                { slab: "₹16,00,001 - ₹24,00,000", rate: "20%", taxable: 0, tax: 0 },
+                { slab: "Above ₹24,00,000", rate: "30%", taxable: 0, tax: 0 }
+            ];
+
+            if (income <= 1200000) {
+                // Section 87A Full Rebate equivalent up to 12L
+                if (income > 0) breakdown[0].taxable = Math.min(income, 400000);
+                if (income > 400000) {
+                    breakdown[1].taxable = Math.min(income - 400000, 400000);
+                    breakdown[1].tax = breakdown[1].taxable * 0.05;
+                }
+                if (income > 800000) {
+                    breakdown[2].taxable = Math.min(income - 800000, 400000);
+                    breakdown[2].tax = breakdown[2].taxable * 0.10;
+                }
+                return {
+                    finalTaxWithCess: 0.0,
+                    standardTaxWithCess: 0.0,
+                    marginalReliefApplied: false,
+                    standardSlabBaseTax: 0,
+                    baseTaxToCharge: 0,
+                    excessIncome: 0,
+                    breakdown: breakdown
+                };
+            }
+
+            // Calculate standard progressive tax
+            breakdown[0].taxable = 400000;
+            breakdown[0].tax = 0;
+
+            breakdown[1].taxable = 400000;
+            breakdown[1].tax = 20000;
+
+            breakdown[2].taxable = 400000;
+            breakdown[2].tax = 40000;
+
+            const fixedTaxUpTo12L = 60000; // 20k + 40k
+            let standardSlabBaseTax = 0;
+
+            if (income <= 1600000) {
+                breakdown[3].taxable = income - 1200000;
+                breakdown[3].tax = breakdown[3].taxable * 0.15;
+                standardSlabBaseTax = fixedTaxUpTo12L + breakdown[3].tax;
+            } else if (income <= 2400000) {
+                breakdown[3].taxable = 400000;
+                breakdown[3].tax = 60000;
+
+                breakdown[4].taxable = income - 1600000;
+                breakdown[4].tax = breakdown[4].taxable * 0.20;
+                standardSlabBaseTax = fixedTaxUpTo12L + 60000 + breakdown[4].tax;
+            } else {
+                breakdown[3].taxable = 400000;
+                breakdown[3].tax = 60000;
+
+                breakdown[4].taxable = 800000;
+                breakdown[4].tax = 160000;
+
+                breakdown[5].taxable = income - 2400000;
+                breakdown[5].tax = breakdown[5].taxable * 0.30;
+                standardSlabBaseTax = fixedTaxUpTo12L + 60000 + 160000 + breakdown[5].tax;
+            }
+
+            // Marginal Relief Logic
+            // Base tax cannot exceed exact income earned over ₹12,00,000
+            const excessIncome = income - 1200000;
+            let baseTaxToCharge = 0;
+            let marginalReliefApplied = false;
+
+            if (standardSlabBaseTax > excessIncome) {
+                baseTaxToCharge = excessIncome;
+                marginalReliefApplied = true;
+            } else {
+                baseTaxToCharge = standardSlabBaseTax;
+                marginalReliefApplied = false;
+            }
+
+            const finalTaxWithCess = baseTaxToCharge * 1.04;
+            const standardTaxWithCess = standardSlabBaseTax * 1.04;
+
+            return {
+                finalTaxWithCess: Math.round(finalTaxWithCess * 100) / 100,
+                standardTaxWithCess: Math.round(standardTaxWithCess * 100) / 100,
+                marginalReliefApplied,
+                standardSlabBaseTax,
+                baseTaxToCharge,
+                excessIncome,
+                breakdown
+            };
+        }
+
+        // Main Recalculate Engine
+        function recalculateAll() {
+            const pureBaseIncome = parseFloat(document.getElementById('pure-base-income').value) || 0;
+            const pastFoodUsed = parseFloat(document.getElementById('past-food-used').value) || 0;
+            const futureFoodPlanned = parseFloat(document.getElementById('future-food-planned').value) || 0;
+            const tdsPaid = parseFloat(document.getElementById('tds-paid').value) || 0;
+
+            const selectedTier = SODEXO_TIERS.find(t => t.id === selectedTierId) || SODEXO_TIERS[0];
+            const monthlySodexo = selectedTier.monthly;
+            const totalSodexoShield = monthlySodexo * 6;
+
+            // Display updates
+            document.getElementById('sodexo-shield-badge').innerText = `₹${totalSodexoShield.toLocaleString('en-IN')} Shield`;
+            
+            const currentAdjustedBaseline = pureBaseIncome + pastFoodUsed;
+            document.getElementById('current-adjusted-baseline-display').innerText = `₹${currentAdjustedBaseline.toLocaleString('en-IN', {maximumFractionDigits: 2})}`;
+
+            // Final Net Taxable Income formula
+            const finalTaxableIncome = Math.max(0, (currentAdjustedBaseline + futureFoodPlanned) - totalSodexoShield);
+
+            // Get Tax calculations
+            const taxResult = calculateTaxNewRegimeWithBreakdown(finalTaxableIncome);
+
+            // Safe headroom calculation
+            const targetThreshold = 1200000;
+            const safeFoodHeadroom = targetThreshold - currentAdjustedBaseline + totalSodexoShield;
+
+            // Update KPI Displays
+            document.getElementById('kpi-taxable-income').innerText = `₹${finalTaxableIncome.toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+            
+            if (finalTaxableIncome <= 1200000) {
+                document.getElementById('kpi-excess-tag').innerText = `Within ₹12L limit (0% Tax)`;
+                document.getElementById('kpi-excess-tag').className = "text-emerald-400 font-semibold";
+            } else {
+                const excess = finalTaxableIncome - 1200000;
+                document.getElementById('kpi-excess-tag').innerText = `+₹${excess.toLocaleString('en-IN')} over ₹12L`;
+                document.getElementById('kpi-excess-tag').className = "text-amber-400 font-semibold";
+            }
+
+            document.getElementById('kpi-tax-liability').innerText = `₹${taxResult.finalTaxWithCess.toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+
+            // KPI 3 Status logic
+            const kpiCard = document.getElementById('kpi-status-card');
+            const kpiLabel = document.getElementById('kpi-status-label');
+            const kpiAmount = document.getElementById('kpi-status-amount');
+            const kpiDesc = document.getElementById('kpi-status-desc');
+
+            if (taxResult.finalTaxWithCess === 0) {
+                kpiCard.className = "glass-panel p-4 rounded-2xl space-y-1 relative overflow-hidden border-l-4 border-l-emerald-500 bg-emerald-950/20";
+                kpiLabel.innerText = "Final Refund Due";
+                kpiLabel.className = "text-[11px] font-medium text-emerald-400 uppercase tracking-wider";
+                kpiAmount.innerText = `₹${tdsPaid.toLocaleString('en-IN')}`;
+                kpiAmount.className = "text-xl font-black text-emerald-400";
+                kpiDesc.innerText = "🌟 Perfect Target! Full refund of TDS.";
+            } else if (taxResult.finalTaxWithCess <= tdsPaid) {
+                const refund = tdsPaid - taxResult.finalTaxWithCess;
+                kpiCard.className = "glass-panel p-4 rounded-2xl space-y-1 relative overflow-hidden border-l-4 border-l-emerald-500 bg-emerald-950/20";
+                kpiLabel.innerText = "Net Refund Due";
+                kpiLabel.className = "text-[11px] font-medium text-emerald-400 uppercase tracking-wider";
+                kpiAmount.innerText = `₹${refund.toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                kpiAmount.className = "text-xl font-black text-emerald-400";
+                kpiDesc.innerText = "Tax covered by TDS. Partial refund due.";
+            } else {
+                const extraDue = taxResult.finalTaxWithCess - tdsPaid;
+                kpiCard.className = "glass-panel p-4 rounded-2xl space-y-1 relative overflow-hidden border-l-4 border-l-rose-500 bg-rose-950/20";
+                kpiLabel.innerText = "Extra Tax Payable";
+                kpiLabel.className = "text-[11px] font-medium text-rose-400 uppercase tracking-wider";
+                kpiAmount.innerText = `₹${extraDue.toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                kpiAmount.className = "text-xl font-black text-rose-400";
+                kpiDesc.innerText = "TDS fully consumed. Extra payment needed.";
+            }
+
+            // Marginal Relief Banner
+            const mrBanner = document.getElementById('marginal-relief-banner');
+            if (taxResult.marginalReliefApplied) {
+                mrBanner.classList.remove('hidden');
+                const pureSavings = taxResult.standardTaxWithCess - taxResult.finalTaxWithCess;
+                document.getElementById('mr-savings-badge').innerText = `Saved: ₹${pureSavings.toLocaleString('en-IN', {maximumFractionDigits: 0})}`;
+                document.getElementById('mr-standard-tax').innerText = `₹${taxResult.standardTaxWithCess.toLocaleString('en-IN')}`;
+                document.getElementById('mr-excess-inc').innerText = `₹${taxResult.excessIncome.toLocaleString('en-IN')}`;
+            } else {
+                mrBanner.classList.add('hidden');
+            }
+
+            // Optimization Hint Card
+            const hintText = document.getElementById('hint-text');
+            if (safeFoodHeadroom > 0) {
+                hintText.innerHTML = `To maintain <strong>₹0 Tax Liability</strong> and get 100% of your TDS refunded, your future food spending limit (Oct - Mar) can be up to <span class="text-emerald-400 font-bold">₹${safeFoodHeadroom.toLocaleString('en-IN')}</span>.`;
+            } else {
+                hintText.innerHTML = `Your current baseline already exceeds the ₹12 Lakh tax-free limit by <span class="text-amber-400 font-bold">₹${Math.abs(safeFoodHeadroom).toLocaleString('en-IN')}</span>. Consider upgrading your Sodexo monthly tier to maximize tax shielding!`;
+            }
+
+            // Progress bar update
+            const progressPercent = Math.min(100, Math.max(0, (finalTaxableIncome / 1600000) * 100));
+            document.getElementById('income-progress-bar').style.width = `${progressPercent}%`;
+            document.getElementById('progress-income-text').innerText = `₹${finalTaxableIncome.toLocaleString('en-IN')} / ₹12,00,000`;
+
+            // Table Breakdown Update
+            renderSlabBreakdownTable(taxResult.breakdown);
+
+            // Chart Update
+            updateChart(taxResult.breakdown);
+
+            // Matrix comparison update
+            renderScenarioMatrix(currentAdjustedBaseline, futureFoodPlanned, tdsPaid);
+        }
+
+        // Render Table Rows for Tax Slabs
+        function renderSlabBreakdownTable(breakdown) {
+            const tbody = document.getElementById('slab-breakdown-rows');
+            tbody.innerHTML = breakdown.map(item => `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="py-2 px-2 font-medium">${item.slab}</td>
+                    <td class="py-2 px-2 text-center text-slate-400 font-mono">${item.rate}</td>
+                    <td class="py-2 px-2 text-right font-mono">₹${item.taxable.toLocaleString('en-IN')}</td>
+                    <td class="py-2 px-2 text-right font-mono font-semibold ${item.tax > 0 ? 'text-amber-400' : 'text-slate-500'}">
+                        ₹${item.tax.toLocaleString('en-IN')}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render What-If Matrix
+        function renderScenarioMatrix(baseline, futureSpend, tdsPaid) {
+            const tbody = document.getElementById('scenario-matrix-body');
+            tbody.innerHTML = SODEXO_TIERS.map(tier => {
+                const shield = tier.monthly * 6;
+                const netIncome = Math.max(0, baseline + futureSpend - shield);
+                const tax = calculateTaxNewRegimeWithBreakdown(netIncome).finalTaxWithCess;
+                const diff = tdsPaid - tax;
+
+                const isCurrent = tier.id === selectedTierId;
+                const rowStyle = isCurrent ? 'bg-emerald-500/10 font-semibold border-l-2 border-l-emerald-500' : 'hover:bg-slate-900/40';
+
+                let statusBadge = '';
+                if (diff >= 0) {
+                    statusBadge = `<span class="text-emerald-400 font-mono">Refund ₹${diff.toLocaleString('en-IN', {maximumFractionDigits:0})}</span>`;
+                } else {
+                    statusBadge = `<span class="text-rose-400 font-mono">Due ₹${Math.abs(diff).toLocaleString('en-IN', {maximumFractionDigits:0})}</span>`;
+                }
+
+                return `
+                    <tr class="${rowStyle}">
+                        <td class="py-2 px-2 flex items-center gap-1.5">
+                            ${isCurrent ? '<i class="fa-solid fa-check-circle text-emerald-400 text-xs"></i>' : ''}
+                            ${tier.label}
+                        </td>
+                        <td class="py-2 px-2 font-mono text-emerald-400">₹${shield.toLocaleString('en-IN')}</td>
+                        <td class="py-2 px-2 text-right font-mono">₹${netIncome.toLocaleString('en-IN')}</td>
+                        <td class="py-2 px-2 text-right font-mono">₹${tax.toLocaleString('en-IN')}</td>
+                        <td class="py-2 px-2 text-right">${statusBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Chart Initialization
+        function initChart() {
+            const ctx = document.getElementById('taxSlabChart').getContext('2d');
+            taxChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-4L', '4L-8L', '8L-12L', '12L-16L', '16L-24L', '>24L'],
+                    datasets: [{
+                        label: 'Tax Owed per Slab (₹)',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.4)',
+                            'rgba(20, 184, 166, 0.5)',
+                            'rgba(245, 158, 11, 0.6)',
+                            'rgba(249, 115, 22, 0.7)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(217, 70, 239, 0.9)'
+                        ],
+                        borderColor: [
+                            '#10b981', '#14b8a6', '#f59e0b', '#f97316', '#ef4444', '#d946ef'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Tax: ₹${context.raw.toLocaleString('en-IN')}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart(breakdown) {
+            if (!taxChart) return;
+            taxChart.data.datasets[0].data = breakdown.map(item => item.tax);
+            taxChart.update();
+        }
+
+        // Reset inputs
+        function resetDefaults() {
+            document.getElementById('pure-base-income').value = 1207466;
+            document.getElementById('past-food-used').value = 0;
+            document.getElementById('future-food-planned').value = 0;
+            document.getElementById('future-food-planned-range').value = 0;
+            document.getElementById('future-spend-val-display').innerText = '₹0';
+            document.getElementById('tds-paid').value = 14800;
+            selectTier("0");
+        }
+    </script>
+</body>
+</html>
